@@ -1,5 +1,14 @@
 $checkbox-radius ?= $radius
 $checkbox-border ?= .1rem solid $grey-lighter
+$checkbox-block-background ?= $white-ter
+$checkradio-focus ?= 1px dotted $grey-light
+$checkradio-top-offset ?= 0rem
+
+$checkbox-radius ?= $radius
+$checkbox-border ?= .1rem solid $grey-lighter
+$checkbox-block-background ?= $white-ter
+$checkradio-focus ?= 1px dotted $grey-light
+$checkradio-top-offset ?= 0rem
 
 checkbox-size($size)
   $newSize = $size * 1.5
@@ -16,8 +25,15 @@ checkbox-size($size)
     &::after
       width $width
       height $height
-      top ( ( $newSize / 2 ) - ( $height / 2 ) ) / 2
+      top ( ( $newSize / 2 ) - ( $height / 2 ) ) * 0.9
       left $height
+
+  &.is-block
+    + label
+      &::after
+        top ( ( ( $newSize / 2 ) - ( $height / 2 ) ) * 1.3 )
+        left $height * 1.3
+
   &.is-rtl
     + label
       padding-left 0
@@ -29,32 +45,27 @@ checkbox-size($size)
 // Use a mixin to define all ratios in the same spot
 radio-size($size)
   $newSize = $size * 1.5
-  $radio-marker-size = $newSize * .5
+  $height = $newSize
+  $width = $newSize
 
   + label
     font-size $size
     line-height $newSize
-    &::before
-      width $newSize
-      height $newSize
-    &::after
-      width $radio-marker-size
-      height $radio-marker-size
-      top ( ( $newSize / 2 ) - ( $radio-marker-size / 2 ) ) / 2
-      left ( $newSize / 2 ) - ( $radio-marker-size / 2 )
+    padding-left $size * 2
+    &::before, &::after
+      width $width
+      height $height
   &.is-rtl
     + label
-      &::after
-        left auto
-        right ( $newSize / 2 ) - ( $radio-marker-size / 2 )
+      padding-right $size * 2
 
-.is-radio[type="radio"],
-.is-checkbox[type="checkbox"]
+.is-checkradio[type="radio"],
+.is-checkradio[type="checkbox"]
   outline 0
   user-select none
-  margin-bottom 0
-  opacity 0
+  display inline-block
   position absolute
+  opacity 0
 
   + label
     position relative
@@ -62,6 +73,8 @@ radio-size($size)
     cursor pointer
     vertical-align middle
     margin-right 0.5rem
+    padding .2rem 1rem .2rem 0
+    border-radius $checkbox-radius
 
     &:hover
       &::before
@@ -72,7 +85,7 @@ radio-size($size)
     &::before
       position absolute
       left 0
-      top -.2rem
+      top $checkradio-top-offset
       content ''
       border $checkbox-border
 
@@ -80,6 +93,7 @@ radio-size($size)
       position absolute
       display none
       content ''
+      top $checkradio-top-offset
 
   &.is-rtl
     + label
@@ -88,6 +102,16 @@ radio-size($size)
       &::before
         left auto
         right 0
+
+  &:focus
+    + label
+      &::before
+        outline $checkradio-focus
+
+  &:hover:not([disabled])
+    + label
+      &::before
+        border-color $primary !important
 
   &:checked
     + label
@@ -124,22 +148,21 @@ radio-size($size)
     &::after
       cursor not-allowed
 
-
-  checkbox-size($size-normal)
-  &.is-small
-    checkbox-size($size-small)
-  &.is-medium
-    checkbox-size($size-medium)
-  &.is-large
-    checkbox-size($size-large)
-
   &.has-no-border
     + label
       &::before
         border none !important
 
+  &.is-block
+    display none !important
+    + label
+      width 100% !important
+      background $checkbox-block-background
+      color findColorInvert($checkbox-block-background)
+      &::before
+        border none !important
 
-.is-checkbox[type="checkbox"]
+.is-checkradio[type="checkbox"]
   + label
     &::before
       border-radius $checkbox-radius
@@ -158,10 +181,22 @@ radio-size($size)
       &::before
         border-radius 50%
 
+  checkbox-size($size-normal)
+  &.is-small
+    checkbox-size($size-small)
+  &.is-medium
+    checkbox-size($size-medium)
+  &.is-large
+    checkbox-size($size-large)
+
   for $name, $pair in $colors
-    $color = $pair['1']
-    $color-invert = $pair['2']
+    $color = nth($pair, 1)
+    $color-invert = nth($pair, 2)
     &.is-{$name}
+      &:hover:not([disabled])
+        + label
+          &::before
+            border-color $color !important
       &:checked
         + label
           &::after
@@ -174,20 +209,40 @@ radio-size($size)
             &::after
               border-color $color-invert !important
               background-color $color !important
+        &.is-block
+          + label
+            color $color-invert
+            border-color $color !important
+            background $color
+            &::after
+              border-color $color-invert !important
 
-.is-radio[type="radio"]
+.is-checkradio[type="radio"]
   + label
     &::before
       border-radius 50%
     &::after
       border-radius 50%
       background $primary
+      left 0
+      transform scale(0.5)
 
   &:checked
     &.has-background-color
       + label
         &::before
           border-color $primary !important
+          background-color $primary !important
+        &::after
+          border-color $white !important
+          background-color $white !important
+
+  &.is-rtl
+    + label
+      padding-left 0
+      &::after
+        left auto
+        right 0
 
   radio-size($size-normal)
   &.is-small
@@ -198,9 +253,13 @@ radio-size($size)
     radio-size($size-large)
 
   for $name, $pair in $colors
-    $color = $pair['1']
-    $color-invert = $pair['2']
+    $color = nth($pair, 1)
+    $color-invert = nth($pair, 2)
     &.is-{$name}
+      &:hover:not([disabled])
+        + label
+          &::before
+            border-color $color !important
       &:checked
         + label
           &::after
@@ -210,6 +269,7 @@ radio-size($size)
           + label
             &::before
               border-color $color !important
-            &::after
-              border-color $color !important
               background-color $color !important
+            &::after
+              border-color $color-invert !important
+              background-color $color-invert !important
